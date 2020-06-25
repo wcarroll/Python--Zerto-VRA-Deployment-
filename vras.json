@@ -1,29 +1,21 @@
 {
-    "HostName":[
-    {
-      "DatastoreName": "DS Name",
-      "PortGroup": "VM Network",
-      "VRAGroup": "Group Name",
-      "MemoryGB": "String",
-      "StaticInfo": [
-          {"DefaultGateway": "Gateway IP"},
-          {"SubnetMask": "Subnet Mask"},
-          {"VRAIPAddress": "Static IP"}
-      ]
-     }
-    ],
-    "HostName": [
-    {
-      "DatastoreName": "DS Name",
-      "PortGroup": "VM Network",
-      "VRAGroup": "VRA Group",
-      "MemoryGB": "String",
-      "StaticInfo": [
-          {"DefaultGateway": "Gateway IP"},
-          {"SubnetMask": "Subnet Mask"},
-          {"VRAIPAddress": "Static IP"}
-      ]
-      }
-    ]
-  }
-  
+  "Hosts": [{
+    "HostName": "HostName 1",
+    "DatastoreName": "DS Name",
+    "PortGroup": "VM Network",
+    "VRAGroup": "default_group",
+    "MemoryGB": "3",
+    "DefaultGateway": "Default Gateway",
+    "SubnetMask": "Subnet Mask",
+    "VRAIPAddress": "Static IP Address"
+  }, {
+    "HostName": "HostName 2",
+    "DatastoreName": "DS Name",
+    "PortGroup": "VM Network",
+    "VRAGroup": "default_group",
+    "MemoryGB": "3",
+    "DefaultGateway": "Default Gateway",
+    "SubnetMask": "Subnet Mask",
+    "VRAIPAddress": "Static IP Address"
+  }]
+}
