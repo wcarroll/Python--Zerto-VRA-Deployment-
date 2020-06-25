@@ -1,10 +1,12 @@
 #importing request, json
 #importing HTTPBasicAuth library for ZVM basic authentication 
 import requests 
-import json 
+import json
+#from collections import Counter
 from requests.auth import HTTPBasicAuth
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from time import sleep
 
 #Declaring Environment variables 
 zvm_ip = "192.168.111.20"
@@ -12,6 +14,7 @@ zvm_u = "administrator@vsphere.local"
 zvm_p = "Zertodata1!" 
 base_url = "https://"+zvm_ip+":9669/v1"
 session = base_url+"/session/add"
+vrainstall_url = base_url+"/vras"
 
 ###Functions####
 def login(session_url, zvm_user, zvm_password):
@@ -49,6 +52,7 @@ network_url = base_url + "/virtualizationsites/"+site_id+"/networks"
 network_ids = requests.get(network_url, headers=headers, verify=False)
 network_ids = network_ids.json()
 
+
 #Gather host IDs for future use
 host_url = base_url + "/virtualizationsites/"+site_id+"/hosts"
 host_ids = requests.get(host_url, headers=headers, verify=False)
@@ -59,19 +63,68 @@ datastore_url = base_url + "/virtualizationsites/"+site_id+"/datastores"
 datastore_ids = requests.get(datastore_url, headers=headers, verify=False)
 datastore_ids = datastore_ids.json()
 
+
 #Read in JSON configuration file 
-with open('C:\\Users\\shaun.finn\\Documents\\SME Role\\Automation\\Deployment\\vra.json', 'r') as f:
+with open('C:\\Users\\shaun.finn\\Documents\\SME Role\\Automation\\Deployment\\vras.json', 'r') as f:
    vra_configuration = json.load(f)
 f.closed
 
-#Convert configuration to list 
-hostnamelist = []
 
+#Iterate through each host listed in vras JSON
+#Gather MoRefs, IPs to POST JSON request 
 
-for host in vra_configuration['Hosts']: 
-   hostnamelist.append(host)
-   count = hostnamelist.count["ESXiHostName"]
-   #count = len(hostnamelist["ESXiHostName"])
-   #print(hostnamelist["ESXiHostName"][:])
+for host in vra_configuration: 
+   datastore_name = vra_configuration.get(host)[0].get('DatastoreName')
+   network_name = vra_configuration.get(host)[0].get('PortGroup')
+   host_name = host
+   memory = vra_configuration.get(host)[0].get('MemoryGB')
+   vra_group = vra_configuration.get(host)[0].get('VRAGroup')
+   vra_gateway = vra_configuration.get(host)[0].get('StaticInfo')[0]['DefaultGateway']
+   vra_subnet = vra_configuration.get(host)[0].get('StaticInfo')[1]['SubnetMask']
+   vra_ip = vra_configuration.get(host)[0].get('StaticInfo')[2]['VRAIPAddress']
 
+   #Iterate through all networks returned by Zerto to find MoRef
+   for network in network_ids: 
+      if network['VirtualizationNetworkName'] == network_name:
+         network_moref = network['NetworkIdentifier']
+      else: 
+         pass
+   #Iterate through all hosts returned by Zerto to find MoRef    
+   for host in host_ids: 
+      if host['VirtualizationHostName'] == host_name: 
+         host_moref = host['HostIdentifier']
+      else: 
+         pass
+   #Iterate through all datastores returned by Zerto to find MoRef    
+   for datastore in datastore_ids: 
+      if datastore['DatastoreName'] == datastore_name:
+         datastore_moref = datastore['DatastoreIdentifier']
+      else: 
+         pass
+
+   #Build VRA dict containing morefs and static IPs
+   vra_dict = {
+      "DatastoreIdentifier":  datastore_moref,
+      "GroupName": vra_group ,
+      "HostIdentifier":  host_moref,
+      "HostRootPassword": None,
+      "MemoryInGb":  memory,
+      "NetworkIdentifier":  network_moref,
+      "UsePublicKeyInsteadOfCredentials": True,
+      "VraNetworkDataApi":  {
+                                 "DefaultGateway":  vra_gateway,
+                                 "SubnetMask":  vra_subnet,
+                                 "VraIPAddress":  vra_ip,
+                                 "VraIPConfigurationTypeApi":  "Static"
+                           }
+   }
+
+   #Convert VRA dict to JSON, post request for install to /vras
+   vra_json = json.dumps(vra_dict)
+   response = requests.post(vrainstall_url, data=vra_json, headers=headers, verify=False)
+   if response.status_code != 200:
+      print(response.text)
+   #Figure out a way to sleep 30 seconds
+   #Print out json status code response 
 print("")
+
