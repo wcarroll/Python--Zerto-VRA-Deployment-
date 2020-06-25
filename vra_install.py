@@ -2,16 +2,15 @@
 #importing HTTPBasicAuth library for ZVM basic authentication 
 import requests 
 import json
-#from collections import Counter
 from requests.auth import HTTPBasicAuth
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from time import sleep
 
 #Declaring Environment variables 
-zvm_ip = "192.168.111.20"
-zvm_u = "administrator@vsphere.local"
-zvm_p = "Zertodata1!" 
+zvm_ip = "ZVM IP"
+zvm_u = "ZVM user"
+zvm_p = "ZVM password" 
 base_url = "https://"+zvm_ip+":9669/v1"
 session = base_url+"/session/add"
 vrainstall_url = base_url+"/vras"
@@ -65,7 +64,7 @@ datastore_ids = datastore_ids.json()
 
 
 #Read in JSON configuration file 
-with open('C:\\Users\\shaun.finn\\Documents\\SME Role\\Automation\\Deployment\\vras.json', 'r') as f:
+with open('File location for vras.json', 'r') as f:
    vra_configuration = json.load(f)
 f.closed
 
