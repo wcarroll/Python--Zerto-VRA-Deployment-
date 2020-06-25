@@ -19,25 +19,27 @@ from time import sleep
 zvm_ip = "ZVM IP"
 zvm_u = "ZVM user"
 zvm_p = "ZVM password" 
-base_url = "https://"+zvm_ip+":9669/v1"
-session = base_url+"/session/add"
-vrainstall_url = base_url+"/vras"
+base_url = f"https://{zvm_ip}:9669/v1"
+session = f"{base_url}/session/add"
+vrainstall_url = f"{base_url}/vras"
 
 ###Functions####
 def login(session_url, zvm_user, zvm_password):
-   print("Getting ZVM API token...")
-   auth_info = "{\r\n\t\"AuthenticationMethod\":1\r\n}"
-   headers = {
-     'Accept': 'application/json',
-     'Content-Type': 'application/json'
-   }
-   response = requests.post(session_url, headers=headers, data=auth_info, verify=False, auth=HTTPBasicAuth(zvm_user, zvm_password))
-   if response.ok: 
-      auth_token = response.headers['x-zerto-session']
-      print("Api Token: " + auth_token)
-      return auth_token
-   else: 
-      print("HTTP %i - %s, Message %s" % (response.status_code, response.reason, response.text))   
+    print("Getting ZVM API token...")
+    auth_info = "{\r\n\t\"AuthenticationMethod\":1\r\n}"
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    response = requests.post(session_url, headers=headers, data=auth_info,
+                             verify=False, auth=HTTPBasicAuth(zvm_user, zvm_password))
+    if response.ok:
+        auth_token = response.headers['x-zerto-session']
+        print(f"Api Token: {auth_token}")
+        return auth_token
+    else:
+        print(
+            f"HTTP {response.status_code} - {response.reason}, Message {response.text}")
 
 returned_token = login(session, zvm_u, zvm_p)
 
@@ -48,25 +50,25 @@ headers = {
    'x-zerto-session': returned_token
 }
 
-#Gather ZVM Site ID for future use
-site_url = base_url+"/localsite"
+# Gather ZVM Site ID for future use
+site_url = f"{base_url}/localsite"
 site_return = requests.get(site_url, headers=headers, verify=False)
 site_return = site_return.json()
 site_id = site_return.get('SiteIdentifier')
 
-#Gather network IDs for future use
-network_url = base_url + "/virtualizationsites/"+site_id+"/networks"
+# Gather network IDs for future use
+network_url = f"{base_url}/virtualizationsites/{site_id}/networks"
 network_ids = requests.get(network_url, headers=headers, verify=False)
 network_ids = network_ids.json()
 
 
-#Gather host IDs for future use
-host_url = base_url + "/virtualizationsites/"+site_id+"/hosts"
+# Gather host IDs for future use
+host_url = f"{base_url}/virtualizationsites/{site_id}/hosts"
 host_ids = requests.get(host_url, headers=headers, verify=False)
 host_ids = host_ids.json()
 
-#Gather Datastore IDs for future use
-datastore_url = base_url + "/virtualizationsites/"+site_id+"/datastores"
+# Gather Datastore IDs for future use
+datastore_url = f"{base_url}/virtualizationsites/{site_id}/datastores"
 datastore_ids = requests.get(datastore_url, headers=headers, verify=False)
 datastore_ids = datastore_ids.json()
 
