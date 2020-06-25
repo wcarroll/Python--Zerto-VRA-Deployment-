@@ -1,27 +1,27 @@
 {
-    "192.168.111.1":[
+    "HostName":[
     {
-      "DatastoreName": "FreeNAS-Left-01",
+      "DatastoreName": "DS Name",
       "PortGroup": "VM Network",
-      "VRAGroup": "Python",
-      "MemoryGB": "3",
+      "VRAGroup": "Group Name",
+      "MemoryGB": "String",
       "StaticInfo": [
-          {"DefaultGateway": "192.168.111.254"},
-          {"SubnetMask": "255.255.255.0"},
-          {"VRAIPAddress": "192.168.111.11"}
+          {"DefaultGateway": "Gateway IP"},
+          {"SubnetMask": "Subnet Mask"},
+          {"VRAIPAddress": "Static IP"}
       ]
      }
     ],
-    "192.168.111.2": [
+    "HostName": [
     {
-      "DatastoreName": "FreeNAS-Left-01",
+      "DatastoreName": "DS Name",
       "PortGroup": "VM Network",
-      "VRAGroup": "Python",
-      "MemoryGB": "3",
+      "VRAGroup": "VRA Group",
+      "MemoryGB": "String",
       "StaticInfo": [
-          {"DefaultGateway": "192.168.111.254"},
-          {"SubnetMask": "255.255.255.0"},
-          {"VRAIPAddress": "192.168.111.12"}
+          {"DefaultGateway": "Gateway IP"},
+          {"SubnetMask": "Subnet Mask"},
+          {"VRAIPAddress": "Static IP"}
       ]
       }
     ]
