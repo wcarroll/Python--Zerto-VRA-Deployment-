@@ -79,61 +79,61 @@ with open('File location for vras.json', 'r') as f:
 f.closed
 
 
-#Iterate through each host listed in vras JSON
-#Gather MoRefs, IPs to POST JSON request 
+# Iterate through each host listed in vras JSON
+# Gather MoRefs, IPs to POST JSON request
 
-for host in vra_configuration: 
-   datastore_name = vra_configuration.get(host)[0].get('DatastoreName')
-   network_name = vra_configuration.get(host)[0].get('PortGroup')
-   host_name = host
-   memory = vra_configuration.get(host)[0].get('MemoryGB')
-   vra_group = vra_configuration.get(host)[0].get('VRAGroup')
-   vra_gateway = vra_configuration.get(host)[0].get('StaticInfo')[0]['DefaultGateway']
-   vra_subnet = vra_configuration.get(host)[0].get('StaticInfo')[1]['SubnetMask']
-   vra_ip = vra_configuration.get(host)[0].get('StaticInfo')[2]['VRAIPAddress']
+for host in vra_configuration['Hosts']:
+    datastore_name = host['DatastoreName']
+    network_name = host['PortGroup']
+    host_name = host['HostName']
+    memory = host['MemoryGB']
+    vra_group = host['VRAGroup']
+    vra_gateway = host['DefaultGateway']
+    vra_subnet = host['SubnetMask']
+    vra_ip = host['VRAIPAddress']
 
-   #Iterate through all networks returned by Zerto to find MoRef
-   for network in network_ids: 
-      if network['VirtualizationNetworkName'] == network_name:
-         network_moref = network['NetworkIdentifier']
-      else: 
-         pass
-   #Iterate through all hosts returned by Zerto to find MoRef    
-   for host in host_ids: 
-      if host['VirtualizationHostName'] == host_name: 
-         host_moref = host['HostIdentifier']
-      else: 
-         pass
-   #Iterate through all datastores returned by Zerto to find MoRef    
-   for datastore in datastore_ids: 
-      if datastore['DatastoreName'] == datastore_name:
-         datastore_moref = datastore['DatastoreIdentifier']
-      else: 
-         pass
+    # Iterate through all networks returned by Zerto to find MoRef
+    for network in network_ids:
+        if network['VirtualizationNetworkName'] == network_name:
+            network_moref = network['NetworkIdentifier']
+        else:
+            pass
+    # Iterate through all hosts returned by Zerto to find MoRef
+    for host in host_ids:
+        if host['VirtualizationHostName'] == host_name:
+            host_moref = host['HostIdentifier']
+        else:
+            pass
+    # Iterate through all datastores returned by Zerto to find MoRef
+    for datastore in datastore_ids:
+        if datastore['DatastoreName'] == datastore_name:
+            datastore_moref = datastore['DatastoreIdentifier']
+        else:
+            pass
 
-   #Build VRA dict containing morefs and static IPs
-   vra_dict = {
-      "DatastoreIdentifier":  datastore_moref,
-      "GroupName": vra_group ,
-      "HostIdentifier":  host_moref,
-      "HostRootPassword": None,
-      "MemoryInGb":  memory,
-      "NetworkIdentifier":  network_moref,
-      "UsePublicKeyInsteadOfCredentials": True,
-      "VraNetworkDataApi":  {
-                                 "DefaultGateway":  vra_gateway,
-                                 "SubnetMask":  vra_subnet,
-                                 "VraIPAddress":  vra_ip,
-                                 "VraIPConfigurationTypeApi":  "Static"
-                           }
-   }
+    # Build VRA dict containing morefs and static IPs
+    vra_dict = {
+        "DatastoreIdentifier":  datastore_moref,
+        "GroupName": vra_group,
+        "HostIdentifier":  host_moref,
+        "HostRootPassword": None,
+        "MemoryInGb":  memory,
+        "NetworkIdentifier":  network_moref,
+        "UsePublicKeyInsteadOfCredentials": True,
+        "VraNetworkDataApi":  {
+            "DefaultGateway":  vra_gateway,
+            "SubnetMask":  vra_subnet,
+            "VraIPAddress":  vra_ip,
+            "VraIPConfigurationTypeApi":  "Static"
+        }
+    }
 
-   #Convert VRA dict to JSON, post request for install to /vras
-   vra_json = json.dumps(vra_dict)
-   response = requests.post(vrainstall_url, data=vra_json, headers=headers, verify=False)
-   if response.status_code != 200:
-      print(response.text)
-   #Figure out a way to sleep 30 seconds
-   #Print out json status code response 
+    # Convert VRA dict to JSON, post request for install to /vras
+    vra_json = json.dumps(vra_dict)
+    response = requests.post(
+        vrainstall_url, data=vra_json, headers=headers, verify=False)
+    if response.status_code != 200:
+        print(response.text)
+    sleep(5)
+    # Print out json status code response
 print("")
-
