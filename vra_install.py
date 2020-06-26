@@ -84,9 +84,9 @@ datastore_url = f"{base_url}/virtualizationsites/{site_id}/datastores"
 datastore_ids = get_identifiers(datastore_url, headers)
 
 
-#Read in JSON configuration file 
-with open('File location for vras.json', 'r') as f:
-   vra_configuration = json.load(f)
+# Read in JSON configuration file
+with open(configuration_file, 'r') as f:
+    vra_configuration = json.load(f)
 f.closed
 
 
