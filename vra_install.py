@@ -49,10 +49,10 @@ def get_identifiers(url: str, headers: dict):
         raise ConnectionError
 
 
-def get_moref(name: str, identifiers: dict, name_key: str, identifier_key: str):
-    for myid in identifiers:
-        if myid[name_key] == name:
-            return myid[identifier_key]
+def get_moref(name: str, identifiers: list, name_key: str, identifier_key: str):
+    r = [myid for myid in identifiers if myid[name_key] == name]
+    if len(r) > 0:
+        return r[0][identifier_key]
     return None
 
 
