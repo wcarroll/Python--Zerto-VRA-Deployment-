@@ -41,6 +41,21 @@ def login(session_url, zvm_user, zvm_password):
         print(
             f"HTTP {response.status_code} - {response.reason}, Message {response.text}")
 
+def get_identifiers(url: str, headers: dict):
+    results = requests.get(url, headers=headers, verify=False)
+    if results.ok:
+        return results.json()
+    else:
+        raise ConnectionError
+
+
+def get_moref(name: str, identifiers: dict, name_key: str, identifier_key: str):
+    for myid in identifiers:
+        if myid[name_key] == name:
+            return myid[identifier_key]
+    return None
+
+
 returned_token = login(session, zvm_u, zvm_p)
 
 # Creating Header with x-zerto-session 
@@ -52,25 +67,21 @@ headers = {
 
 # Gather ZVM Site ID for future use
 site_url = f"{base_url}/localsite"
-site_return = requests.get(site_url, headers=headers, verify=False)
-site_return = site_return.json()
+site_return = get_identifiers(site_url, headers)
 site_id = site_return.get('SiteIdentifier')
 
 # Gather network IDs for future use
 network_url = f"{base_url}/virtualizationsites/{site_id}/networks"
-network_ids = requests.get(network_url, headers=headers, verify=False)
-network_ids = network_ids.json()
+network_ids = get_identifiers(network_url, headers)
 
 
 # Gather host IDs for future use
 host_url = f"{base_url}/virtualizationsites/{site_id}/hosts"
-host_ids = requests.get(host_url, headers=headers, verify=False)
-host_ids = host_ids.json()
+host_ids = get_identifiers(host_url, headers)
 
 # Gather Datastore IDs for future use
 datastore_url = f"{base_url}/virtualizationsites/{site_id}/datastores"
-datastore_ids = requests.get(datastore_url, headers=headers, verify=False)
-datastore_ids = datastore_ids.json()
+datastore_ids = get_identifiers(datastore_url, headers)
 
 
 #Read in JSON configuration file 
@@ -92,26 +103,25 @@ for host in vra_configuration['Hosts']:
     vra_subnet = host['SubnetMask']
     vra_ip = host['VRAIPAddress']
 
-    # Iterate through all networks returned by Zerto to find MoRef
-    for network in network_ids:
-        if network['VirtualizationNetworkName'] == network_name:
-            network_moref = network['NetworkIdentifier']
-        else:
-            pass
-    # Iterate through all hosts returned by Zerto to find MoRef
-    for host in host_ids:
-        if host['VirtualizationHostName'] == host_name:
-            host_moref = host['HostIdentifier']
-        else:
-            pass
-    # Iterate through all datastores returned by Zerto to find MoRef
-    for datastore in datastore_ids:
-        if datastore['DatastoreName'] == datastore_name:
-            datastore_moref = datastore['DatastoreIdentifier']
-        else:
-            pass
-
-    # Build VRA dict containing morefs and static IPs
+    # Get each MoRef ID for each required element
+    network_moref = get_moref(
+        network_name,
+        network_ids,
+        'VirtualizationNetworkName',
+        'NetworkIdentifier'
+    )
+    host_moref = get_moref(
+        host_name,
+        host_ids,
+        'VirtualizationHostName',
+        'HostIdentifier'
+    )
+    datastore_moref = get_moref(
+        datastore_name,
+        datastore_ids,
+        'DatastoreName',
+        'DatastoreIdentifier'
+    )
     vra_dict = {
         "DatastoreIdentifier":  datastore_moref,
         "GroupName": vra_group,
